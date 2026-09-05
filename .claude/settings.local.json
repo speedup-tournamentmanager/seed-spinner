@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls -la \"/Users/bonaxelbryanremoreras/Documents/Development/pickleball_webapp/app/static/assets/\" 2>&1 | head -50)",
+      "Bash(open -R /Users/bonaxelbryanremoreras/Documents/Development/draw_wheel/pickleball_draw_wheel.html)",
+      "Bash(cp /Users/bonaxelbryanremoreras/Documents/Development/pickleball_webapp/app/static/assets/bg-1.jpg /private/tmp/claude-502/-Users-bonaxelbryanremoreras-Documents-Development-draw-wheel/61a04155-0c0f-4f69-9236-5dd0dee67f02/scratchpad/preview/)",
+      "Bash(cp /Users/bonaxelbryanremoreras/Documents/Development/pickleball_webapp/app/static/assets/speedup-logo.png /private/tmp/claude-502/-Users-bonaxelbryanremoreras-Documents-Development-draw-wheel/61a04155-0c0f-4f69-9236-5dd0dee67f02/scratchpad/preview/)",
+      "Bash(sed -i '' 's#file:///Users/bonaxelbryanremoreras/Documents/Development/pickleball_webapp/app/static/assets/bg-1.jpg#bg-1.jpg#' /private/tmp/claude-502/-Users-bonaxelbryanremoreras-Documents-Development-draw-wheel/61a04155-0c0f-4f69-9236-5dd0dee67f02/scratchpad/preview/preview.html)",
+      "Bash(sed -i '' 's#file:///Users/bonaxelbryanremoreras/Documents/Development/pickleball_webapp/app/static/assets/speedup-logo.png#speedup-logo.png#' /private/tmp/claude-502/-Users-bonaxelbryanremoreras-Documents-Development-draw-wheel/61a04155-0c0f-4f69-9236-5dd0dee67f02/scratchpad/preview/preview.html)",
+      "Bash(cp /Users/bonaxelbryanremoreras/Documents/Development/pickleball_webapp/app/static/assets/bg-1.jpg /Users/bonaxelbryanremoreras/Documents/Development/draw_wheel/_preview_bg-1.jpg)",
+      "Bash(cp /Users/bonaxelbryanremoreras/Documents/Development/pickleball_webapp/app/static/assets/speedup-logo.png /Users/bonaxelbryanremoreras/Documents/Development/draw_wheel/_preview_logo.png)",
+      "Bash(sed -i '' 's#file:///Users/bonaxelbryanremoreras/Documents/Development/pickleball_webapp/app/static/assets/bg-1.jpg#_preview_bg-1.jpg#' /Users/bonaxelbryanremoreras/Documents/Development/draw_wheel/_preview.html)",
+      "Bash(sed -i '' 's#file:///Users/bonaxelbryanremoreras/Documents/Development/pickleball_webapp/app/static/assets/speedup-logo.png#_preview_logo.png#' /Users/bonaxelbryanremoreras/Documents/Development/draw_wheel/_preview.html)"
+    ]
+  }
+}
