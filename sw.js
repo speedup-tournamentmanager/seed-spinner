@@ -7,7 +7,7 @@
  * Bump CACHE_NAME every time you ship a new build of
  * index.html so installed copies pick up the change.
  */
-var CACHE_NAME = "pb-draw-wheel-shell-v4";
+var CACHE_NAME = "pb-draw-wheel-shell-v5";
 var CORE = ["./", "./index.html", "./assets/speedup-logo.png"];
 
 // Must match the constants in index.html -- this is the

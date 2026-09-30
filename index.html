@@ -871,6 +871,18 @@
         gap: 14px;
         margin-bottom: 22px;
       }
+      .draw-log {
+        margin-bottom: 22px;
+        color: var(--ink);
+      }
+      .draw-log summary {
+        cursor: pointer;
+        font-weight: 600;
+      }
+      .draw-log ol {
+        margin: 10px 0 0;
+        padding-left: 24px;
+      }
       .result-card {
         background: var(--surface);
         border: 1px solid var(--border);
@@ -1339,6 +1351,11 @@
 
         <div class="results-grid" id="resultsGrid"></div>
 
+        <details class="draw-log" id="drawLog">
+          <summary>Draw log</summary>
+          <ol id="drawLogList"></ol>
+        </details>
+
         <div class="begin-bar">
           <button class="btn btn-ghost" id="btnBackToDraw">
             &larr; Back to draw
@@ -1655,6 +1672,7 @@
             unassigned: [],
             mode: "auto",
             nextId: 1,
+            log: [],
           };
         }
 
@@ -1682,6 +1700,7 @@
         if (!state.maxPerPool) state.maxPerPool = 6;
         if (!state.calcPairs) state.calcPairs = 0;
         if (!state.calcPairsManual) state.calcPairsManual = false;
+        if (!state.log) state.log = [];
 
         // ---------------------------------------------------------------
         // Parsing: accepts a Tournament Manager CSV export (Pool, Player 1,
@@ -2179,6 +2198,7 @@
           .getElementById("btnBegin")
           .addEventListener("click", function () {
             state.groups = {};
+            state.log = [];
             for (var i = 0; i < state.numGroups; i++)
               state.groups[letterFor(i)] = [];
             state.unassigned = state.teams.map(function (t) {
@@ -2204,9 +2224,21 @@
         var spinning = false;
         var pendingManualTeamId = null;
 
+        // Uniform random integer in [0, n) from the browser's cryptographic
+        // random source. Rejection sampling avoids modulo bias, so every
+        // value has exactly the same chance.
+        function randInt(n) {
+          var buf = new Uint32Array(1);
+          var limit = Math.floor(4294967296 / n) * n;
+          do {
+            crypto.getRandomValues(buf);
+          } while (buf[0] >= limit);
+          return buf[0] % n;
+        }
+
         function shuffle(arr) {
           for (var i = arr.length - 1; i > 0; i--) {
-            var j = Math.floor(Math.random() * (i + 1));
+            var j = randInt(i + 1);
             var tmp = arr[i];
             arr[i] = arr[j];
             arr[j] = tmp;
@@ -2379,6 +2411,11 @@
         function commitAssignment(teamId, letter) {
           var team = teamById(teamId);
           state.groups[letter].push(team);
+          state.log.push({
+            n: state.log.length + 1,
+            team: team.p1 + " / " + team.p2,
+            group: letter,
+          });
           state.unassigned = state.unassigned.filter(function (id) {
             return id !== teamId;
           });
@@ -2427,7 +2464,7 @@
           revealEl.innerHTML = "";
 
           var n = state.unassigned.length;
-          var winnerIdx = Math.floor(Math.random() * n);
+          var winnerIdx = randInt(n);
           var winnerId = state.unassigned[winnerIdx];
           var team = teamById(winnerId);
 
@@ -2469,7 +2506,7 @@
           var desiredMod = (360 - winnerCenter) % 360;
           var delta = desiredMod - currentMod;
           if (delta <= 0) delta += 360;
-          var extraSpins = 5 + Math.floor(Math.random() * 3);
+          var extraSpins = 5 + randInt(3);
           currentRotation += delta + extraSpins * 360;
           wheelSvg.style.transform = "rotate(" + currentRotation + "deg)";
 
@@ -2608,6 +2645,13 @@
               card.appendChild(ol);
               resultsGridEl.appendChild(card);
             });
+          var logList = document.getElementById("drawLogList");
+          logList.innerHTML = "";
+          (state.log || []).forEach(function (entry) {
+            var li = document.createElement("li");
+            li.textContent = entry.team + " \u2192 Group " + entry.group;
+            logList.appendChild(li);
+          });
         }
 
         document
