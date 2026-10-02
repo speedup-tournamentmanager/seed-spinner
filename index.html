@@ -1811,6 +1811,15 @@
           return { lo: base, hi: extra > 0 ? base + 1 : base };
         }
 
+        // Solo entries (one name missing) show just the name they have.
+        function teamLabel(t) {
+          return [t.p1, t.p2]
+            .filter(function (n) {
+              return n && n.trim();
+            })
+            .join(" / ");
+        }
+
         function letterFor(index) {
           // A, B, ... Z, AA, AB, ... -- mirrors Tournament Manager's own pool
           // lettering so a Group here always matches a real Pool letter.
@@ -2102,7 +2111,7 @@
           }
 
           var incomplete = state.teams.some(function (t) {
-            return !t.p1.trim() || !t.p2.trim();
+            return !t.p1.trim() && !t.p2.trim();
           });
           btnBegin.disabled = teamCount < 2 || incomplete || !isValidBracket;
           save();
@@ -2365,7 +2374,7 @@
                 var li = document.createElement("li");
                 if (i < teamsHere.length) {
                   var t = teamsHere[i];
-                  li.textContent = t.p1 + " / " + t.p2;
+                  li.textContent = teamLabel(t);
                   if (t.id === justAddedTeamId) li.className = "just-added";
                 } else {
                   li.className = "slot-empty";
@@ -2411,7 +2420,7 @@
           state.groups[letter].push(team);
           state.log.push({
             n: state.log.length + 1,
-            team: team.p1 + " / " + team.p2,
+            team: teamLabel(team),
             group: letter,
           });
           state.unassigned = state.unassigned.filter(function (id) {
@@ -2469,7 +2478,7 @@
           function afterLanding() {
             var nameEl = document.createElement("div");
             nameEl.className = "name";
-            nameEl.textContent = team.p1 + " / " + team.p2;
+            nameEl.textContent = teamLabel(team);
             revealEl.appendChild(nameEl);
 
             if (state.mode === "auto") {
@@ -2637,7 +2646,7 @@
               var ol = document.createElement("ol");
               teams.forEach(function (t) {
                 var li = document.createElement("li");
-                li.textContent = t.p1 + " / " + t.p2;
+                li.textContent = teamLabel(t);
                 ol.appendChild(li);
               });
               card.appendChild(ol);
@@ -2680,7 +2689,7 @@
               .forEach(function (letter) {
                 lines.push("Group " + letter + ":");
                 state.groups[letter].forEach(function (t) {
-                  lines.push("  " + t.p1 + " / " + t.p2);
+                  lines.push("  " + teamLabel(t));
                 });
                 lines.push("");
               });
