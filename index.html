@@ -1216,13 +1216,10 @@
         <div class="panel" style="margin-top: 20px">
           <h2>Group setup</h2>
           <p class="hint">
-            Enter your pair count and the min/max you want per pool. Pool count
-            is locked to a real bracket format --
-            <strong
-              >4 pools (Round of 8), 8 pools (Round of 16), or 16 pools (Round
-              of 32)</strong
-            >
-            -- and the calculator only shows whichever of those fit your range.
+            Enter your pair count and the min/max you want per pool, then pick
+            any number of pools below. The calculator suggests the standard
+            bracket sizes -- 4 pools (Round of 8), 8 (Round of 16), 16 (Round of
+            32) -- but you can type any count from 1 to 16.
           </p>
           <div class="row">
             <div class="field" style="max-width: 150px">
@@ -2026,23 +2023,15 @@
           numGroupsInput.value = n;
           state.numGroups = n;
 
-          // Error trap: pool count must match a real bracket format (Round of
-          // 8/16/32 -> 4/8/16 pools). Anything else is blocked from starting
-          // the draw, since it wouldn't seed into a bracket Tournament Manager
-          // actually runs.
-          var isValidBracket = BRACKET_POOL_COUNTS.indexOf(n) !== -1;
-          numGroupsInput.classList.toggle("input-error", !isValidBracket);
-          if (isValidBracket) {
-            bracketErrorEl.classList.add("vis-hidden");
+          // Any pool count is allowed; the standard bracket sizes just get a
+          // label so organizers know which round they seed into.
+          bracketErrorEl.classList.add("vis-hidden");
+          numGroupsInput.classList.remove("input-error");
+          if (BRACKET_LABELS[n]) {
             bracketLabelEl.innerHTML = "&#10003;&nbsp;" + BRACKET_LABELS[n];
             bracketLabelEl.classList.remove("vis-hidden");
           } else {
             bracketLabelEl.classList.add("vis-hidden");
-            bracketErrorEl.textContent =
-              "Pool count must be 4, 8, or 16 to match a real bracket (Round of " +
-              "8, 16, or 32) -- pick an option from the calculator above, or " +
-              "enter one of those numbers directly.";
-            bracketErrorEl.classList.remove("vis-hidden");
           }
 
           var teamCount = state.teams.length;
@@ -2113,7 +2102,7 @@
           var incomplete = state.teams.some(function (t) {
             return !t.p1.trim() && !t.p2.trim();
           });
-          btnBegin.disabled = teamCount < 2 || incomplete || !isValidBracket;
+          btnBegin.disabled = teamCount < 2 || incomplete;
           save();
         }
 
