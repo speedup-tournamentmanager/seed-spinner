@@ -1919,7 +1919,9 @@
             return bracketFits(pairs, g, min, max);
           });
           var best = null;
-          fitting.forEach(function (g) {
+          // Nothing fits the min/max? Still recommend the closest bracket so
+          // the draw can go ahead (uneven pools are only a warning).
+          (fitting.length ? fitting : BRACKET_POOL_COUNTS).forEach(function (g) {
             if (
               best === null ||
               Math.abs(pairs / g - target) < Math.abs(pairs / best - target)
@@ -1933,17 +1935,13 @@
             note.className = "calc-empty";
             note.textContent =
               pairs +
-              " pairs doesn't fit any bracket format with " +
+              " pairs doesn't fit " +
               min +
               "–" +
               max +
-              " per pool. Widen your min/max, or aim for " +
-              BRACKET_POOL_COUNTS.map(function (g) {
-                return (
-                  g * min + "–" + g * max + " pairs (" + BRACKET_LABELS[g] + ")"
-                );
-              }).join(", ") +
-              ".";
+              " per pool in any bracket format, but you can still run the " +
+              "draw -- pools will just be slightly smaller or larger than " +
+              "your range. Or widen min/max to match.";
             calcOptionsEl.appendChild(note);
           }
 
@@ -2092,7 +2090,7 @@
                   min +
                   "–" +
                   max +
-                  " per-pool range.",
+                  " per-pool range. You can still start the draw.",
               );
             }
           }
