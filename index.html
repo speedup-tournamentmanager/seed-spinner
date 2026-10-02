@@ -1259,6 +1259,15 @@
               <option value="16">Round of 32</option>
             </datalist>
           </div>
+          <div class="field" style="max-width: 220px; margin-top: 12px">
+            <label for="seedCount">Seeded teams (drawn first)</label>
+            <input type="number" id="seedCount" min="0" max="50" value="0" />
+          </div>
+          <p class="hint" id="seedHint" style="margin-top: 4px">
+            The first N teams in the list are drawn first, on their own wheel,
+            so top seeds are spread across pools. Everyone else is drawn after.
+            0 = no seeding.
+          </p>
           <span class="count-pill vis-hidden" id="bracketLabel"></span>
           <div class="letters-preview" id="lettersPreview"></div>
           <div class="error-note vis-hidden" id="bracketError"></div>
@@ -1662,6 +1671,8 @@
             numGroups: 4,
             minPerPool: 4,
             maxPerPool: 6,
+            seedCount: 0,
+            seedIds: [],
             calcPairs: 0,
             calcPairsManual: false,
             screen: "setup",
@@ -1698,6 +1709,8 @@
         if (!state.calcPairs) state.calcPairs = 0;
         if (!state.calcPairsManual) state.calcPairsManual = false;
         if (!state.log) state.log = [];
+        if (!state.seedCount) state.seedCount = 0;
+        if (!state.seedIds) state.seedIds = [];
 
         // ---------------------------------------------------------------
         // Parsing: accepts a Tournament Manager CSV export (Pool, Player 1,
@@ -1781,6 +1794,7 @@
         var lettersPreviewEl = document.getElementById("lettersPreview");
         var groupWarnEl = document.getElementById("groupWarn");
         var numGroupsInput = document.getElementById("numGroups");
+        var seedCountInput = document.getElementById("seedCount");
         var minPerPoolInput = document.getElementById("minPerPool");
         var maxPerPoolInput = document.getElementById("maxPerPool");
         var calcPairsInput = document.getElementById("calcPairs");
@@ -2036,6 +2050,13 @@
 
           var teamCount = state.teams.length;
 
+          var seeds = Math.max(
+            0,
+            Math.min(teamCount, parseInt(seedCountInput.value, 10) || 0),
+          );
+          seedCountInput.value = seeds;
+          state.seedCount = seeds;
+
           lettersPreviewEl.innerHTML = "";
           for (var i = 0; i < n; i++) {
             var chip = document.createElement("span");
@@ -2179,6 +2200,7 @@
           });
 
         numGroupsInput.addEventListener("input", syncGroupStats);
+        seedCountInput.addEventListener("input", syncGroupStats);
         minPerPoolInput.addEventListener("input", syncGroupStats);
         maxPerPoolInput.addEventListener("input", syncGroupStats);
         calcPairsInput.addEventListener("input", function () {
@@ -2201,6 +2223,12 @@
               return t.id;
             });
             shuffle(state.unassigned);
+            // The first N teams in the roster are seeds: drawn first.
+            state.seedIds = state.teams
+              .slice(0, state.seedCount || 0)
+              .map(function (t) {
+                return t.id;
+              });
             goToScreen("draw");
             renderDrawScreen(true);
           });
@@ -2276,8 +2304,17 @@
           ].join(" ");
         }
 
+        // Seeds come off the wheel first; once they're all placed, the
+        // remaining teams are drawn.
+        function wheelIds() {
+          var seedsLeft = state.unassigned.filter(function (id) {
+            return state.seedIds && state.seedIds.indexOf(id) !== -1;
+          });
+          return seedsLeft.length ? seedsLeft : state.unassigned;
+        }
+
         function renderWheel() {
-          var n = state.unassigned.length;
+          var n = wheelIds().length;
           wheelSvg.innerHTML = "";
           emptyWheelEl.classList.toggle("vis-hidden", n > 0);
           spinBtn.disabled = n === 0 || spinning;
@@ -2379,7 +2416,15 @@
         function renderProgress() {
           var total = state.teams.length;
           var done = assignedCount();
-          progressLabelEl.textContent = done + " / " + total + " assigned";
+          var seedsLeft = state.unassigned.filter(function (id) {
+            return state.seedIds && state.seedIds.indexOf(id) !== -1;
+          }).length;
+          progressLabelEl.textContent =
+            done +
+            " / " +
+            total +
+            " assigned" +
+            (seedsLeft ? " -- seeds first (" + seedsLeft + " left)" : "");
           progressFillEl.style.width = (total ? (done / total) * 100 : 0) + "%";
           btnToResults.classList.toggle(
             "vis-hidden",
@@ -2459,9 +2504,10 @@
           spinBtn.disabled = true;
           revealEl.innerHTML = "";
 
-          var n = state.unassigned.length;
+          var ids = wheelIds();
+          var n = ids.length;
           var winnerIdx = randInt(n);
-          var winnerId = state.unassigned[winnerIdx];
+          var winnerId = ids[winnerIdx];
           var team = teamById(winnerId);
 
           function afterLanding() {
@@ -2712,6 +2758,7 @@
             document.getElementById("pasteBox").value = "";
             renderRoster();
             numGroupsInput.value = state.numGroups;
+            seedCountInput.value = state.seedCount;
             minPerPoolInput.value = state.minPerPool;
             maxPerPoolInput.value = state.maxPerPool;
             calcPairsInput.value = state.calcPairs;
@@ -2751,6 +2798,7 @@
 
         function init() {
           numGroupsInput.value = state.numGroups || 4;
+          seedCountInput.value = state.seedCount || 0;
           minPerPoolInput.value = state.minPerPool || 4;
           maxPerPoolInput.value = state.maxPerPool || 6;
           calcPairsInput.value = state.calcPairsManual
